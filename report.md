@@ -10,14 +10,14 @@
 
 _Assumed propagation speed in fiber:_ $2 \times 10^8\text{ m/s}$ ($200\text{ km/ms}$).
 
-| Target Mirror                               | Location           | Estimated Distance (RTT km) | Predicted Min Connect Time (ms) |
-| :------------------------------------------ | :----------------- | :-------------------------- | :------------------------------ |
-| **CDN** (`example.com`)                     | Nearest POP        | [Insert km]                 | [Insert ms]                     |
-| **Utah** (`mirrors.xmission.com`)           | Salt Lake City, UT | [Insert km]                 | [Insert ms]                     |
-| **California** (`mirrors.ocf.berkeley.edu`) | Berkeley, CA       | [Insert km]                 | [Insert ms]                     |
-| **New York** (`mirrors.rit.edu`)            | Rochester, NY      | [Insert km]                 | [Insert ms]                     |
-| **Germany** (`ftp.fau.de`)                  | Erlangen, Germany  | [Insert km]                 | [Insert ms]                     |
-| **Japan** (`ftp.jaist.ac.jp`)               | Nomi, Japan        | [Insert km]                 | [Insert ms]                     |
+| Target Mirror | URL | Location | Estimated Distance (RTT km) | Predicted Min Connect Time (ms) |
+| :------------ | :-- | :------- | :-------------------------- | :------------------------------ |
+| **CDN** | <http://example.com/> | Nearest POP | [Insert km] | [Insert ms] |
+| **Utah** | <http://mirrors.xmission.com/debian/README> | Salt Lake City, UT | [Insert km] | [Insert ms] |
+| **California** | <http://mirrors.ocf.berkeley.edu/debian/README> | Berkeley, CA | [Insert km] | [Insert ms] |
+| **New York** | <http://mirrors.rit.edu/debian/README> | Rochester, NY | [Insert km] | [Insert ms] |
+| **Germany** | <http://ftp.fau.de/debian/README> | Erlangen, Germany | [Insert km] | [Insert ms] |
+| **Japan** | <http://ftp.jaist.ac.jp/debian/README> | Nomi, Japan | [Insert km] | [Insert ms] |
 
 **Calculation Method / Work:**
 
