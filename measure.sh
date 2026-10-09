@@ -28,7 +28,7 @@ LATENCY_TARGETS=(
 )
 
 usage() {
-    printf 'Usage: %s <vantage-name>\n' "$0" >&2
+    printf 'Usage: %s laptop|onyx|codespace\n' "$0" >&2
 }
 
 print_network_addresses() {
@@ -45,8 +45,7 @@ print_network_addresses() {
 }
 
 section() {
-    printf '\n=== %s ===\n' "$1"
-    printf 'started  %s\n' "$(date -u)"
+    printf '\n=== %s  %s ===\n' "$1" "$(date -u +%H:%M:%S)"
 }
 
 lookup_target() {
@@ -84,7 +83,7 @@ run_pageload() {
     return 0
 }
 
-if [[ $# -ne 1 || -z $1 ]]; then
+if [[ $# -ne 1 || ( $1 != laptop && $1 != onyx && $1 != codespace ) ]]; then
     usage
     exit 1
 fi
@@ -100,19 +99,19 @@ fi
 exec > >(tee -a "$log_file") 2>&1
 
 SECONDS=0
-printf '=== x1 measure.sh vantage=%s ===\n' "$vantage"
-printf 'date      %s\n' "$(date -u)"
-printf 'hostname  %s\n' "$(hostname)"
-printf 'uname     %s\n' "$(uname -a)"
-printf 'commit    %s\n' "$(git rev-parse --short HEAD)"
-print_network_addresses
-
 make
 status=$?
 if ((status != 0)); then
     printf 'Build failed with exit status %d; no measurements were run.\n' "$status"
     exit "$status"
 fi
+
+printf '=== x1 measure.sh  vantage=%s ===\n' "$vantage"
+printf 'date      %s\n' "$(date -u)"
+printf 'hostname  %s\n' "$(hostname)"
+printf 'uname     %s\n' "$(uname -a)"
+printf 'commit    %s\n' "$(git rev-parse --short HEAD)"
+print_network_addresses
 
 mkdir -p "$body_directory"
 status=$?
@@ -122,6 +121,21 @@ if ((status != 0)); then
 fi
 
 failures=0
+
+section "public address"
+if lookup_target "public-address"; then
+    ./pageload -4 -o "$body_directory/$TARGET_OUTPUT" "$TARGET_URL"
+    status=$?
+    if ((status == 0)); then
+        cat "$body_directory/$TARGET_OUTPUT"
+    else
+        failures=$((failures + 1))
+        printf 'public address failed with exit status %d; continuing.\n' "$status"
+    fi
+else
+    failures=$((failures + 1))
+    printf 'Public address target configuration was not found; continuing.\n'
+fi
 
 for target_name in "${LATENCY_TARGETS[@]}"; do
     location=${target_name#latency-}
@@ -139,11 +153,13 @@ section "two at once utah"
 if lookup_target "latency-utah"; then
     first_log=''
     second_log=''
-    if first_log=$(mktemp) && second_log=$(mktemp); then
-        ./pageload -4 -n "$LATENCY_TRIALS" -o "$body_directory/two-at-once-utah-1.body" \
+    first_body=''
+    second_body=''
+    if first_log=$(mktemp) && second_log=$(mktemp) && first_body=$(mktemp) && second_body=$(mktemp); then
+        ./pageload -4 -n "$LATENCY_TRIALS" -o "$first_body" \
             "$TARGET_URL" >"$first_log" 2>&1 &
         first_pid=$!
-        ./pageload -4 -n "$LATENCY_TRIALS" -o "$body_directory/two-at-once-utah-2.body" \
+        ./pageload -4 -n "$LATENCY_TRIALS" -o "$second_body" \
             "$TARGET_URL" >"$second_log" 2>&1 &
         second_pid=$!
 
@@ -155,7 +171,7 @@ if lookup_target "latency-utah"; then
         cat "$first_log"
         printf '%s\n' "--- second Utah run ---"
         cat "$second_log"
-        rm -f "$first_log" "$second_log"
+        rm -f "$first_log" "$second_log" "$first_body" "$second_body"
 
         if ((first_status != 0)); then
             failures=$((failures + 1))
@@ -167,7 +183,7 @@ if lookup_target "latency-utah"; then
         fi
     else
         failures=$((failures + 1))
-        [[ -n $first_log ]] && rm -f "$first_log"
+        rm -f "$first_log" "$second_log" "$first_body" "$second_body"
         printf 'Unable to create temporary files for concurrent Utah runs; continuing.\n'
     fi
 else
@@ -186,24 +202,7 @@ else
     printf 'NOTE: DNS trace was not run because dig is not installed; continuing.\n'
 fi
 
-section "public address"
-if lookup_target "public-address"; then
-    ./pageload -4 -o "$TARGET_OUTPUT" "$TARGET_URL"
-    status=$?
-    if ((status == 0)); then
-        cat "$TARGET_OUTPUT"
-    else
-        failures=$((failures + 1))
-        printf 'public address failed with exit status %d; continuing.\n' "$status"
-    fi
-else
-    failures=$((failures + 1))
-    printf 'Public address target configuration was not found; continuing.\n'
-fi
-
-printf '\n=== measure.sh summary ===\n'
-printf 'total runtime: %d seconds\n' "$SECONDS"
-printf 'targets failed: %d\n' "$failures"
+printf '\n=== done in %d s, %d failed ===\n' "$SECONDS" "$failures"
 
 if ((failures > 0)); then
     exit 1

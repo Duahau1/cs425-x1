@@ -378,7 +378,7 @@ static int fetch_trial(const struct url *url, int family, unsigned int number,
             if (now(&end) == -1) {
                 goto done;
             }
-            transfer_ms = elapsed_ms(&start, &end);
+            transfer_ms = elapsed_ms(&first_byte, &end);
             break;
         }
         if (!received_first_byte) {
