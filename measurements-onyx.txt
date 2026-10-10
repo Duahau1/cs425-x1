@@ -1,0 +1,387 @@
+make: Nothing to be done for 'all'.
+=== x1 measure.sh  vantage=onyx ===
+date      Sat Oct 10 04:32:07 PM UTC 2026
+hostname  onyx.boisestate.edu
+uname     Linux onyx.boisestate.edu 5.14.0-687.12.1.el9_8.x86_64 #1 SMP PREEMPT_DYNAMIC Mon May 25 06:29:57 EDT 2026 x86_64 x86_64 x86_64 GNU/Linux
+commit    05bbfa5
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+4: eno12399np0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP group default qlen 1000
+    altname enp75s0f0np0
+    inet 132.178.227.11/25 brd 132.178.227.127 scope global noprefixroute eno12399np0
+       valid_lft forever preferred_lft forever
+
+=== public address  16:32:07 ===
+Trial 1
+  DNS:      71.364 ms, 3.219.143.246 (IPv4)
+  Connect:  62.642 ms, 132.178.227.11:58812 -> 3.219.143.246:80
+  Status:   HTTP/1.1 200 
+  First byte: 63.930 ms
+  Transfer: 0.039 ms, 15 body bytes, 3.059 Mbit/s
+Summary
+  Trials:               1
+  Minimum connect time: 62.642 ms
+  Median connect time:  62.642 ms
+132.178.227.11
+
+=== latency cdn  16:32:07 ===
+Trial 1
+  DNS:      29.455 ms, 172.66.147.243 (IPv4)
+  Connect:  11.750 ms, 132.178.227.11:48096 -> 172.66.147.243:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 24.070 ms
+  Transfer: 1.796 ms, 589 body bytes, 2.624 Mbit/s
+Trial 2
+  DNS:      28.225 ms, 104.20.23.154 (IPv4)
+  Connect:  11.570 ms, 132.178.227.11:38488 -> 104.20.23.154:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 22.069 ms
+  Transfer: 0.695 ms, 589 body bytes, 6.776 Mbit/s
+Trial 3
+  DNS:      32.139 ms, 172.66.147.243 (IPv4)
+  Connect:  11.381 ms, 132.178.227.11:48104 -> 172.66.147.243:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 21.147 ms
+  Transfer: 1.747 ms, 589 body bytes, 2.697 Mbit/s
+Trial 4
+  DNS:      28.404 ms, 172.66.147.243 (IPv4)
+  Connect:  11.573 ms, 132.178.227.11:48120 -> 172.66.147.243:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 20.087 ms
+  Transfer: 1.745 ms, 589 body bytes, 2.700 Mbit/s
+Trial 5
+  DNS:      32.167 ms, 172.66.147.243 (IPv4)
+  Connect:  11.630 ms, 132.178.227.11:48126 -> 172.66.147.243:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 31.928 ms
+  Transfer: 1.050 ms, 589 body bytes, 4.488 Mbit/s
+Summary
+  Trials:               5
+  Minimum connect time: 11.381 ms
+  Median connect time:  11.573 ms
+
+=== latency utah  16:32:07 ===
+Trial 1
+  DNS:      29.182 ms, 198.60.22.13 (IPv4)
+  Connect:  49.863 ms, 132.178.227.11:34798 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.405 ms
+  Transfer: 0.018 ms, 1198 body bytes, 542.634 Mbit/s
+Trial 2
+  DNS:      28.597 ms, 198.60.22.13 (IPv4)
+  Connect:  49.820 ms, 132.178.227.11:34806 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.356 ms
+  Transfer: 0.011 ms, 1198 body bytes, 862.491 Mbit/s
+Trial 3
+  DNS:      31.931 ms, 198.60.22.13 (IPv4)
+  Connect:  49.612 ms, 132.178.227.11:34808 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.100 ms
+  Transfer: 0.010 ms, 1198 body bytes, 957.634 Mbit/s
+Trial 4
+  DNS:      28.563 ms, 198.60.22.13 (IPv4)
+  Connect:  49.944 ms, 132.178.227.11:34816 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.536 ms
+  Transfer: 0.010 ms, 1198 body bytes, 980.160 Mbit/s
+Trial 5
+  DNS:      28.369 ms, 198.60.22.13 (IPv4)
+  Connect:  50.053 ms, 132.178.227.11:34818 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.474 ms
+  Transfer: 0.037 ms, 1198 body bytes, 257.116 Mbit/s
+Summary
+  Trials:               5
+  Minimum connect time: 49.612 ms
+  Median connect time:  49.863 ms
+
+=== latency california  16:32:08 ===
+Trial 1
+  DNS:      28.813 ms, 169.229.200.70 (IPv4)
+  Connect:  25.051 ms, 132.178.227.11:46736 -> 169.229.200.70:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 25.598 ms
+  Transfer: 0.016 ms, 1198 body bytes, 612.083 Mbit/s
+Trial 2
+  DNS:      113.084 ms, 169.229.200.70 (IPv4)
+  Connect:  25.034 ms, 132.178.227.11:46746 -> 169.229.200.70:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 25.358 ms
+  Transfer: 0.132 ms, 1198 body bytes, 72.602 Mbit/s
+Trial 3
+  DNS:      56.941 ms, 169.229.200.70 (IPv4)
+  Connect:  25.003 ms, 132.178.227.11:46750 -> 169.229.200.70:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 25.308 ms
+  Transfer: 0.222 ms, 1198 body bytes, 43.152 Mbit/s
+Trial 4
+  DNS:      136.835 ms, 169.229.200.70 (IPv4)
+  Connect:  25.214 ms, 132.178.227.11:46760 -> 169.229.200.70:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 25.589 ms
+  Transfer: 0.280 ms, 1198 body bytes, 34.183 Mbit/s
+Trial 5
+  DNS:      66.074 ms, 169.229.200.70 (IPv4)
+  Connect:  24.988 ms, 132.178.227.11:46768 -> 169.229.200.70:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 25.306 ms
+  Transfer: 0.064 ms, 1198 body bytes, 148.912 Mbit/s
+Summary
+  Trials:               5
+  Minimum connect time: 24.988 ms
+  Median connect time:  25.034 ms
+
+=== latency new-york  16:32:09 ===
+Trial 1
+  DNS:      32.212 ms, 129.21.171.72 (IPv4)
+  Connect:  52.355 ms, 132.178.227.11:33798 -> 129.21.171.72:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 52.939 ms
+  Transfer: 0.015 ms, 1198 body bytes, 641.413 Mbit/s
+Trial 2
+  DNS:      28.192 ms, 129.21.171.72 (IPv4)
+  Connect:  52.542 ms, 132.178.227.11:33810 -> 129.21.171.72:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 52.922 ms
+  Transfer: 0.009 ms, 1198 body bytes, 1009.373 Mbit/s
+Trial 3
+  DNS:      108.710 ms, 129.21.171.72 (IPv4)
+  Connect:  52.494 ms, 132.178.227.11:33816 -> 129.21.171.72:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 52.869 ms
+  Transfer: 0.010 ms, 1198 body bytes, 987.634 Mbit/s
+Trial 4
+  DNS:      28.468 ms, 129.21.171.72 (IPv4)
+  Connect:  52.412 ms, 132.178.227.11:33824 -> 129.21.171.72:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 52.891 ms
+  Transfer: 0.011 ms, 1198 body bytes, 886.997 Mbit/s
+Trial 5
+  DNS:      32.107 ms, 129.21.171.72 (IPv4)
+  Connect:  52.529 ms, 132.178.227.11:33840 -> 129.21.171.72:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 52.849 ms
+  Transfer: 0.037 ms, 1198 body bytes, 257.040 Mbit/s
+Summary
+  Trials:               5
+  Minimum connect time: 52.355 ms
+  Median connect time:  52.494 ms
+
+=== latency germany  16:32:10 ===
+Trial 1
+  DNS:      1029.381 ms, 131.188.12.211 (IPv4)
+  Connect:  145.324 ms, 132.178.227.11:44696 -> 131.188.12.211:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 145.852 ms
+  Transfer: 0.018 ms, 1198 body bytes, 523.201 Mbit/s
+Trial 2
+  DNS:      28.720 ms, 131.188.12.211 (IPv4)
+  Connect:  145.391 ms, 132.178.227.11:44698 -> 131.188.12.211:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 145.787 ms
+  Transfer: 0.010 ms, 1198 body bytes, 967.104 Mbit/s
+Trial 3
+  DNS:      171.829 ms, 131.188.12.211 (IPv4)
+  Connect:  145.856 ms, 132.178.227.11:51154 -> 131.188.12.211:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 145.922 ms
+  Transfer: 0.012 ms, 1198 body bytes, 777.859 Mbit/s
+Trial 4
+  DNS:      33.849 ms, 131.188.12.211 (IPv4)
+  Connect:  145.237 ms, 132.178.227.11:51158 -> 131.188.12.211:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 146.058 ms
+  Transfer: 0.011 ms, 1198 body bytes, 906.546 Mbit/s
+Trial 5
+  DNS:      32.479 ms, 131.188.12.211 (IPv4)
+  Connect:  145.289 ms, 132.178.227.11:51166 -> 131.188.12.211:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 145.921 ms
+  Transfer: 0.040 ms, 1198 body bytes, 237.946 Mbit/s
+Summary
+  Trials:               5
+  Minimum connect time: 145.237 ms
+  Median connect time:  145.324 ms
+
+=== latency japan  16:32:12 ===
+Trial 1
+  DNS:      344.676 ms, 150.65.7.130 (IPv4)
+  Connect:  132.146 ms, 132.178.227.11:37770 -> 150.65.7.130:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 199.182 ms
+  Transfer: 0.018 ms, 1198 body bytes, 534.642 Mbit/s
+Trial 2
+  DNS:      31.828 ms, 150.65.7.130 (IPv4)
+  Connect:  132.067 ms, 132.178.227.11:37772 -> 150.65.7.130:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 133.281 ms
+  Transfer: 0.010 ms, 1198 body bytes, 924.383 Mbit/s
+Trial 3
+  DNS:      203.394 ms, 150.65.7.130 (IPv4)
+  Connect:  131.973 ms, 132.178.227.11:37774 -> 150.65.7.130:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 133.297 ms
+  Transfer: 0.010 ms, 1198 body bytes, 931.209 Mbit/s
+Trial 4
+  DNS:      207.562 ms, 150.65.7.130 (IPv4)
+  Connect:  132.160 ms, 132.178.227.11:37790 -> 150.65.7.130:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 141.132 ms
+  Transfer: 0.010 ms, 1198 body bytes, 975.272 Mbit/s
+Trial 5
+  DNS:      201.697 ms, 150.65.7.130 (IPv4)
+  Connect:  132.253 ms, 132.178.227.11:37802 -> 150.65.7.130:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 133.451 ms
+  Transfer: 0.043 ms, 1198 body bytes, 225.289 Mbit/s
+Summary
+  Trials:               5
+  Minimum connect time: 131.973 ms
+  Median connect time:  132.146 ms
+
+=== download utah  16:32:15 ===
+Trial 1
+  DNS:      32.182 ms, 198.60.22.13 (IPv4)
+  Connect:  49.781 ms, 132.178.227.11:58144 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.615 ms
+  Transfer: 1250.075 ms, 13332733 body bytes, 85.324 Mbit/s
+Trial 2
+  DNS:      28.660 ms, 198.60.22.13 (IPv4)
+  Connect:  49.945 ms, 132.178.227.11:58160 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.826 ms
+  Transfer: 1358.366 ms, 13332733 body bytes, 78.522 Mbit/s
+Trial 3
+  DNS:      31.939 ms, 198.60.22.13 (IPv4)
+  Connect:  49.773 ms, 132.178.227.11:58170 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.638 ms
+  Transfer: 1224.417 ms, 13332733 body bytes, 87.112 Mbit/s
+Summary
+  Trials:               3
+  Minimum connect time: 49.773 ms
+  Median connect time:  49.781 ms
+
+=== download japan  16:32:19 ===
+Trial 1
+  DNS:      28.854 ms, 150.65.7.130 (IPv4)
+  Connect:  132.243 ms, 132.178.227.11:37814 -> 150.65.7.130:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 134.534 ms
+  Transfer: 40620.362 ms, 13332733 body bytes, 2.626 Mbit/s
+Trial 2
+  DNS:      144.546 ms, 150.65.7.130 (IPv4)
+  Connect:  132.139 ms, 132.178.227.11:54028 -> 150.65.7.130:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 134.353 ms
+  Transfer: 50950.948 ms, 13332733 body bytes, 2.093 Mbit/s
+Trial 3
+  DNS:      119.444 ms, 150.65.7.130 (IPv4)
+  Connect:  132.129 ms, 132.178.227.11:33006 -> 150.65.7.130:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 152.358 ms
+  Transfer: 100512.978 ms, 13332733 body bytes, 1.061 Mbit/s
+Summary
+  Trials:               3
+  Minimum connect time: 132.129 ms
+  Median connect time:  132.139 ms
+
+=== two at once utah  16:35:32 ===
+--- first Utah run ---
+Trial 1
+  DNS:      29.037 ms, 198.60.22.13 (IPv4)
+  Connect:  49.733 ms, 132.178.227.11:56554 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.247 ms
+  Transfer: 0.016 ms, 1198 body bytes, 597.954 Mbit/s
+Trial 2
+  DNS:      31.893 ms, 198.60.22.13 (IPv4)
+  Connect:  49.945 ms, 132.178.227.11:56586 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.423 ms
+  Transfer: 0.012 ms, 1198 body bytes, 802.411 Mbit/s
+Trial 3
+  DNS:      34.070 ms, 198.60.22.13 (IPv4)
+  Connect:  49.698 ms, 132.178.227.11:56614 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.111 ms
+  Transfer: 0.011 ms, 1198 body bytes, 912.241 Mbit/s
+Trial 4
+  DNS:      31.575 ms, 198.60.22.13 (IPv4)
+  Connect:  49.718 ms, 132.178.227.11:56636 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.227 ms
+  Transfer: 0.010 ms, 1198 body bytes, 951.832 Mbit/s
+Trial 5
+  DNS:      31.717 ms, 198.60.22.13 (IPv4)
+  Connect:  49.683 ms, 132.178.227.11:56658 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.242 ms
+  Transfer: 0.036 ms, 1198 body bytes, 267.478 Mbit/s
+Summary
+  Trials:               5
+  Minimum connect time: 49.683 ms
+  Median connect time:  49.718 ms
+--- second Utah run ---
+Trial 1
+  DNS:      28.582 ms, 198.60.22.13 (IPv4)
+  Connect:  49.625 ms, 132.178.227.11:56568 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.187 ms
+  Transfer: 0.016 ms, 1198 body bytes, 604.707 Mbit/s
+Trial 2
+  DNS:      28.047 ms, 198.60.22.13 (IPv4)
+  Connect:  49.936 ms, 132.178.227.11:56574 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.374 ms
+  Transfer: 0.012 ms, 1198 body bytes, 787.640 Mbit/s
+Trial 3
+  DNS:      28.429 ms, 198.60.22.13 (IPv4)
+  Connect:  49.865 ms, 132.178.227.11:56602 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.241 ms
+  Transfer: 0.011 ms, 1198 body bytes, 904.834 Mbit/s
+Trial 4
+  DNS:      28.446 ms, 198.60.22.13 (IPv4)
+  Connect:  49.783 ms, 132.178.227.11:56624 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.404 ms
+  Transfer: 0.010 ms, 1198 body bytes, 973.291 Mbit/s
+Trial 5
+  DNS:      28.371 ms, 198.60.22.13 (IPv4)
+  Connect:  49.986 ms, 132.178.227.11:56650 -> 198.60.22.13:80
+  Status:   HTTP/1.1 200 OK
+  First byte: 50.434 ms
+  Transfer: 0.034 ms, 1198 body bytes, 278.856 Mbit/s
+Summary
+  Trials:               5
+  Minimum connect time: 49.625 ms
+  Median connect time:  49.865 ms
+
+=== DNS trace  16:35:33 ===
+
+; <<>> DiG 9.16.23-RH <<>> +trace ftp.jaist.ac.jp
+;; global options: +cmd
+.			518400	IN	NS	a.root-servers.net.
+.			518400	IN	NS	b.root-servers.net.
+.			518400	IN	NS	c.root-servers.net.
+.			518400	IN	NS	d.root-servers.net.
+.			518400	IN	NS	e.root-servers.net.
+.			518400	IN	NS	f.root-servers.net.
+.			518400	IN	NS	g.root-servers.net.
+.			518400	IN	NS	h.root-servers.net.
+.			518400	IN	NS	i.root-servers.net.
+.			518400	IN	NS	j.root-servers.net.
+.			518400	IN	NS	k.root-servers.net.
+.			518400	IN	NS	l.root-servers.net.
+.			518400	IN	NS	m.root-servers.net.
+;; Received 239 bytes from 10.50.18.111#53(10.50.18.111) in 28 ms
+
+;; connection timed out; no servers could be reached
+
+NOTE: DNS trace failed with exit status 9; this is expected on Onyx because it blocks non-campus DNS servers.
+
+=== done in 258 s, 0 failed ===
