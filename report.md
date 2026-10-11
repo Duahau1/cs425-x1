@@ -222,7 +222,7 @@ _DNS times in ms from the `latency` sections (5 trials each). Mirror: Utah (`mir
 When a program looks up a name, it asks a local DNS server, which answers from its cache or else resolves the name through the root, TLD and authoritative servers (section 2.4). The first lookup is slow because the cache is empty. The answer is then stored for its TTL, and later lookups are served from the cache without leaving the local network. The ttl is long enough so that we can safely assume that trial 2-5's result are from the local cache.
 
 The laptop and Codespace follow this pattern. Trial 1 is slow (125.745 ms and 35.278 ms), and trials 2 to 5 are fast (about 2 ms and 0.5 ms), so a nearby cache answered them. Onyx does not: all five trials are about 28 to 32 ms.
-Local caches make repeat lookups almost free, while a remote shared server charges one round trip every time.I went into the `measurements-onyx.txt` and looked at dns lookup time of other locations and I realized that trial 2-5 lookup time sometimes even higher than the first look up time. This is the indication that the dns record did not get cached on locally properly on Onyx.
+Local caches make repeat lookups almost free, while a remote shared server charges one round trip every time.I went into the `measurements-onyx.txt` and looked at dns lookup time of other locations and I realized that trial 2-5 lookup time sometimes even higher than the first look up time. Looking at the above table, there are 2 possible explanations for this, one is the dns record did not get cached on locally properly on Onyx or the dns record has already get cached so what I got was hit record retrieved from the cache.
 
 #### Question 7 - The DNS hierarchy
 
@@ -395,18 +395,13 @@ The binary of Onyx 132.178.227.11/25. The first three octets are fully in the ne
 
 ## Task 6 - Catch the Agent
 
-For more context, after I input all the data, this is what I asked
+- **Quote from Agent Session:** The agent wrote `measure.sh` with these targets (`copilot-session.md`, around line 3273):
 
-```
-The dns lookup time from laptop and codespace aligned with my above prediction as the dns resolver cached the dns record so subsequent lookup time dropped. The onyx's look up time stayed almost constant. I went into the `measurements-onyx.txt` and looked at dns lookup time of other locations and I realized that trial 2-5 lookup time sometimes even higher than the first look up time. This is the indication that the dns record did not get cached on locally or any where along the paths that it hopped (if it hopped on the same path).  does it make sense ?
-```
+  > `"latency-utah|http://mirrors.xmission.com/|utah.body"`
+  > `"download-utah|http://mirrors.xmission.com/ubuntu/dists/noble/main/binary-amd64/Packages.gz|utah-Packages.gz"`
+  > `"download-japan|http://ftp.jaist.ac.jp/pub/Linux/debian/dists/stable/main/binary-amd64/Packages.gz|japan-Packages.gz"`
 
-- **Quote from Agent Session:**
-  > "Partly. The laptop and Codespace part is right, but your Onyx conclusion is probably wrong. **Laptop and Codespace:** this is correct. DNS drops from tens or hundreds of ms to about 0.5 to 2 ms because the local resolver cached the record (section 2.4). Say what your prediction was, so the link is explicit.**Onyx: "the record did not get cached" doesn't follow from your data** - Utah's DNS time on Onyx is about 29 ms on all five trials, including trial 1. If nothing were cached, trial 1 would be slow, as it is on the laptop and Codespace. - Your `dig +trace` shows the campus resolver (10.50.18.111) answering a query for the root NS list in 28 ms. That list is certainly cached, so about 28 ms is the cost of reaching the resolver from Onyx. So 28 to 32 ms is most likely a **cache hit** with a high fixed cost, not a miss. - Another explanation for the spikes: the first Utah lookup was already a hit because earlier runs had cached it. Records for far-away names (California, Germany, Japan) show spikes of 100 to 1,000 ms. Those could be misses, or a different resolver instance with its own cache, if the campus uses a pool. **What to write:** the cache works on Onyx but the resolver is far, so every hit costs about 29 ms. Occasional spikes suggest misses or a pool of resolvers. Say you can't confirm which.
+  Its own reasoning noted "I should verify the download URLs for accuracy", but it did not. It then reported the run as complete (around line 3930).
 
-**A quick test:** on Onyx, run `dig mirrors.xmission.com` twice and compare the "Query time" and the TTL. A TTL that counts down between runs means the answer came from a cache. That would be good evidence to quote.
-
-The phrase "if it hopped on the same path" is unclear, so drop it or rephrase it as "if the queries reached the same resolver"."
-
-- **Verification Method:** Compared the Onyx DNS timings in `measurements-onyx.txt` with the HTTP `Connect` timings, then used textbook section 2.4 to distinguish recursive DNS resolution from an HTTP connection to a mirror.
-- **Explanation & Correct Answer:** The agent's conclusion that the Onyx cache "works" is too certain. The data shows a roughly 28-32 ms floor for many answers, but it does not prove that a response came from a cache or identify where that cache was located. The HTTP connect time to Japan or Germany also cannot establish a minimum DNS lookup time because authoritative DNS servers can be hosted separately from the HTTP mirror. The Onyx timing variation is consistent with cache hits, cache misses, or different recursive-resolver instances. To verify caching, query the same resolver twice and confirm that the returned TTL decreases on the second response.
+- **Verification Method:** I compared the URLs in `measure.sh` with the mirror list in the assignment. The assignment gives `http://mirrors.xmission.com/debian/README` for Utah and `http://ftp.jaist.ac.jp/debian/README` for Japan, and later gives `/debian/dists/trixie/main/binary-amd64/Packages.gz` for the downloads.
+- **Explanation & Correct Answer:** The agent invented URLs that the assignment did not give. The latency targets were the bare mirror roots, not the `/debian/README` paths. The Utah download used an Ubuntu path (`/ubuntu/dists/noble/`) on a Debian mirror. The Japan download used `/pub/Linux/debian/dists/stable/`, which is also not the specified path. A script that runs without errors does not prove its targets are right. The agent should have used only the URLs from the assignment, or asked. The correct targets are `/debian/README` for latency and `/debian/dists/trixie/main/binary-amd64/Packages.gz` for downloads, which the agent applied only after I corrected it, you can read about this in `session-1.md`.
