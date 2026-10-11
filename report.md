@@ -8,8 +8,6 @@
 
 ## Task 3 - Predictions
 
-_Write these before running any measurement, then paste them into the agent session so the log timestamps them._
-
 ### 1. Distance vs. Delay (Theoretical Minimum Connect Time)
 
 _Laptop location:_ [Boise, Idaho, US] (about 43.6135, -116.2035). The network is T-Mobile (AS21928).
@@ -64,13 +62,11 @@ _Assumed propagation speed in fiber:_ $2 \times 10^8\text{ m/s}$ ($200\text{ km/
 
 ## Task 5 - Analysis Questions
 
-_Use your own measurements for every answer, show your work, and cite the textbook section. Delete the italic hints when you finish._
-
 ### Chapter 1 - Delay and Throughput
 
 #### Question 1 - Distance versus delay
 
-_Propagation RTT = 2 × distance ÷ 200 km/ms = distance ÷ 100, using the propagation-delay model from J. F. Kurose and K. W. Ross, Computer Networking: A Top-Down Approach, Pearson, 2026, sec. 1.4.1. Min connect is the minimum of the 5 trials in `measurements-<vantage>.txt`; ratio = min connect ÷ propagation RTT. Distances are great-circle distances in km. Interpreting it:
+_Propagation RTT = 2 × distance ÷ 200 km/ms = distance ÷ 100, using the propagation-delay model from section 1.4.1. Min connect is the minimum of the 5 trials in `measurements-<vantage>.txt`; ratio = min connect ÷ propagation RTT. Distances are great-circle distances in km. Interpreting it:
 A ratio close to 1 means almost all delay is just physical propagation.
 A larger ratio means additional delay from queuing, transmission, and processing._
 
@@ -107,14 +103,10 @@ A larger ratio means additional delay from queuing, transmission, and processing
 | Germany                   | 8,259         | 82.59                | 152.897          | 1.85  |
 | Japan                     | 8,018         | 80.18                | 107.391          | 1.34  |
 
-_Work shown: one worked example of the great-circle (haversine) calculation goes here._
-
 #### Question 2 - Where the extra time goes
 
-_Four components of nodal delay (section 1.4): processing, queuing, transmission, propagation. Plus the path is not a straight line. Which dominates for Japan, and which for Utah?_
-
 According to the textbook section 1.4, there are 4 types of nodal delay where the total nodal delay is equal $$d_{\text{nodal}} = d_{\text{proc}} + d_{\text{queue}} + d_{\text{trans}} + d_{\text{prop}}$$
-Calculation in theory did not account for any of this and also it is hard to know what these number are since they are not dynamic and fluctuated all the time. This total delay node added to the connect time which made the actual connection bigger that the one we calculated.
+Calculation in theory did not account for any of this and also it is hard to know what these number are since they are not constant and fluctuated all the time. This total delay node added to the connect time which made the actual connection bigger that the one we calculated.
 
 I have also included the factor where path is not a straight line (or crow flies) in my prediction in Task 3. In reality, it would be impossible just have a crow flies access(which is the shortest possible path). In chapter 1.4, the textbook introduce `traceroute` example which was a very niche demonstration that path is not a straight line. I ran `traceroute ftp.fau.de` on my computer and by observing IPs of all the hops the way data packets travel are zigzag where each hop is a router chosen by real-world forwarding decisions, not by a straight-line geographic route.
 
@@ -124,8 +116,9 @@ with propagation dominating for long-haul Japan and queueing/processing dominati
 
 #### Question 3 - Minimum, not mean
 
-_Mirror used: New York (`mirrors.rit.edu`), because it shows both the noisiest and the quietest vantage points. Connect times are in ms, from the five trials of each `latency new-york` section. Spread = max - min._
-Sample standard deviation: $s = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})^2}$, where $x_i$ are the 5 connect times, $\bar{x}$ is their mean, and $n = 5$.
+We will use New York (`mirrors.rit.edu`), because it shows both the noisiest and the quietest vantage points and also the Japan mirrors as well.
+
+Sample standard deviation: $s = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})^2}$, where $x_i$ are the 5 connect times, $\bar{x}$ is their mean, and $n = 5$. Spread = max - min
 
 | Trial          | Laptop  | Onyx   | Codespace |
 | :------------- | :------ | :----- | :-------- |
@@ -183,8 +176,6 @@ These values are tiny compared with the Utah propagation RTT of about 4.76 ms, s
 
 #### Question 5 - Throughput
 
-_Use the 3 trials of each Packages.gz download. Table: vantage, mirror, Mbit/s per trial. Is the access link the bottleneck in both cases? Evidence: does Utah throughput differ from Japan on the same link?_
-
 _Throughput in Mbit/s from the `download` sections (13,332,733 bytes each). RTT is the minimum connect time from the same section._
 
 | Vantage   | Mirror | RTT (ms) | Trial 1 (Mbit/s) | Trial 2 (Mbit/s) | Trial 3 (Mbit/s) | Max (Mbit/s) | Mean (Mbit/s) |
@@ -192,6 +183,14 @@ _Throughput in Mbit/s from the `download` sections (13,332,733 bytes each). RTT 
 | Laptop    | Utah   | 58.482   | 94.965           | 94.830           | 129.469          | 129.469      | 106.42        |
 | Onyx      | Utah   | 49.773   | 85.324           | 78.522           | 87.112           | 87.112       | 83.65         |
 | Codespace | Utah   | 31.384   | 319.607          | 318.705          | 311.124          | 319.607      | 316.48        |
+
+_Japan (`ftp.jaist.ac.jp`):_
+
+| Vantage   | Mirror | RTT (ms) | Trial 1 (Mbit/s) | Trial 2 (Mbit/s) | Trial 3 (Mbit/s) | Max (Mbit/s) | Mean (Mbit/s) |
+| :-------- | :----- | :------- | :--------------- | :--------------- | :--------------- | :----------- | :------------ |
+| Laptop    | Japan  | 181.134  | 5.724            | 6.110            | 7.241            | 7.241        | 6.36          |
+| Onyx      | Japan  | 132.129  | 2.626            | 2.093            | 1.061            | 2.626        | 1.93          |
+| Codespace | Japan  | 107.348  | 11.761           | 23.086           | 23.034           | 23.086       | 19.29         |
 
 _Utah ÷ Japan, by vantage point:_
 
@@ -209,9 +208,7 @@ The access link cannot be the bottleneck in both cases. Each vantage point uses 
 
 #### Question 6 - DNS caching
 
-_One mirror per vantage point. DNS time of trial 1 versus trials 2 to 5. Local DNS server and cache, TTL (section 2.4)._
-
-_DNS times in ms from the `latency` sections (5 trials each). Mirror: Utah (`mirrors.xmission.com`). Mean 2-5 is the mean of trials 2 to 5._
+The mirror is used is the one from Utah
 
 | Vantage   | Mirror | Trial 1 | Trial 2 | Trial 3 | Trial 4 | Trial 5 | Mean 2-5 |
 | :-------- | :----- | :------ | :------ | :------ | :------ | :------ | :------- |
@@ -237,10 +234,6 @@ The laptop's trace (`dig +trace ftp.jaist.ac.jp` in `measurements-laptop.txt`). 
 
 #### Question 8 - The CDN
 
-_Did `example.com` get the same address at all three vantage points? Compare its connect time with the mirrors. Section 2.6: DNS redirection versus anycast. Mention the CF-RAY colo code if you have it._
-
-_Addresses `example.com` resolved to in the five `latency cdn` trials (`-4`) at each vantage point._
-
 | Vantage   | Address (number of trials)            | Min connect (ms) |
 | :-------- | :------------------------------------ | :--------------- |
 | Laptop    | 172.66.147.243 (5)                    | 34.814           |
@@ -250,11 +243,11 @@ _Addresses `example.com` resolved to in the five `latency cdn` trials (`-4`) at 
 All three vantage points received the same IP address 172.66.147.243, but there are address changed between trials at Onyx and Codespace.
 In question 1, I have a table that had all the connect time, and the connect time of `example.com` is the lowest compare to all the mirrors.
 
-Based on chapter 2.5 of the textbook, I think the strategy that it is using is cluster selection strategy where cdn maps your local dns server's ip to a geographic location using geolocation databases and then pick the nearest/best-performing one to you. The fact that the connect time is very low with Onyx and Codespace it is only 5ms-12ms means that the CDN has a cluster near each vantage point. The addresses differed between trials at Onyx and Codespace meaning the CDN does not always send us to the same server, it is select the most optimal one to send us to (this is base on delay, bandwidth, not just closest edge).
+Based on chapter 2.5 of the textbook, I think the strategy that it is using is cluster selection strategy where cdn maps your local dns server's ip to a geographic location using geo-location databases and then pick the nearest/best-performing one to you. The fact that the connect time is very low with Onyx and Codespace it is only 5ms-12ms means that the CDN has a cluster near each vantage point. The addresses differed between trials at Onyx and Codespace meaning the CDN does not always send us to the same server, it is select the most optimal one to send us to (this is base on delay, bandwidth, not just closest edge).
 
 #### Question 9 - Counting round trips
 
-_First byte ≈ 1 RTT + server time, so server time ≈ first byte − min connect. Do two mirrors. Then count RTTs from DNS start to last byte (DNS, TCP handshake, HTTP request) and compare with the non-persistent HTTP estimate in section 2.2 and A2 step 4._
+First byte ≈ 1 RTT + server time, so server time ≈ first byte − min connect
 
 | Mirror | Vantage | Trial | Connect / RTT (ms) | First byte (ms) | Estimated server time (ms) |
 | :----- | :------ | :---- | :----------------- | :-------------- | :------------------------- |
@@ -292,8 +285,6 @@ From the above table, we can see based on the last ratio column, the ratio is ar
 
 #### Question 10 - The handshake
 
-_When `connect` returns: SYN sent, SYN-ACK received. The third segment (ACK) is sent but not waited for. Why does the client not need to wait? Section 3.5._
-
 When the client-side `connect()` call returns, the following `TCP` segments have been sent and received:
 
 - Sent by Client: The initial `SYN` segment.
@@ -305,8 +296,6 @@ When the client-side `connect()` call returns, the following `TCP` segments have
 As outline in section 3.5.6, the client does not need to wait for the `ACK` reply from the server because the client transitions from `SYN_SENT` to `ESTABLISHED` as soon as it receives the server's `SYN-ACK` and fires off its own final `ACK`. As soon as the client dispatches that last acknowledgment packet, the local connection state is marked open, allowing `connect()` to return, both sides are ready to send data.
 
 #### Question 11 - Demultiplexing
-
-_Take the "two at once" section of one measurement file. Write down both 4-tuples. What differs, who picked it (the OS picks the ephemeral source port), and how the server tells them apart (4-tuple demultiplexing, section 3.2)._
 
 Using the "two at once" section of `measurements-onyx.txt`, against Utah's mirror, trial 1 for each run.
 
@@ -321,10 +310,8 @@ In section 3.2, when multiple TCP connections arrive at the web server’s port 
 
 #### Question 12 - Slow start
 
-_MSS = 1,460 B, initial cwnd = 10 segments, doubling each RTT, no loss. File = 13,332,733 B, so segments = ceil(size / 1460). Find the number of RTTs n where 10 × (2^n − 1) ≥ segments. Shortest time = n × RTT using your min connect time (add the handshake RTT if you want to be strict, and say so). Compare with the measured transfer time. Sections 3.5 and 3.7._
-
 Using the onyx vantage point, with the package size 13MB
-Segments = ceil(13332733/ 1406)= 9132.0089 so it is 9133 segments
+Segments = ceil(13332733/ 1460)= 9132.0089 so it is 9133 segments
 Then using 10 × (2^n − 1) ≥ segments we get n = 10 as n=9 is less than what we need.
 The shortest time is n x RTT and measured is the mean transfer time of the 3 downloads
 
@@ -334,13 +321,11 @@ The shortest time is n x RTT and measured is the mean transfer time of the 3 dow
 | Japan  | 9133     | 10          | 131.976  | 1319.7             | 64028.1       |
 
 The Utah path comes much closer to its theoretical estimate, scaling far better than the trans-continental Japan link.
-I think slow start did set the minimum as we can see that the measured time for Utah is about 2.6 this minium and the rest is coming propagation delay, nodal delay, or congestion. The measured Japan is about 48 times the shortest time, however, we are measuring this reality where all sort of things could have happened so just the slow start time cannot explain this in this case. Higher propagation delay over long distances increases the penalty of any packet drops or retransmissions, forcing the connection out of slow-start and into congestion avoidance or timeout recovery.
+I think slow start did set the minimum as we can see that the measured time for Utah is about 2.6 this minium and the rest is link rate, nodal delay, or congestion. The measured Japan is about 48 times the shortest time, however, we are measuring this reality where all sort of things could have happened so just the slow start time cannot explain this in this case. Higher propagation delay over long distances increases the penalty of any packet drops or retransmissions, forcing the connection out of slow-start and into congestion avoidance or timeout recovery.
 
 ### Chapter 4 - The Network Layer
 
 #### Question 13 - Private and public addresses
-
-_Local address comes from the 4-tuple, public from `checkip`. RFC 1918 ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16. Behind a NAT if the local and public addresses differ._
 
 The local address is the source address in the 4 tuple from `measurements-<vantage>.txt`. The public address is coming from `checkip`. And according to section 4.3, where it said that for private RFC 1918 address blocks(RFC 1918 ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16),they must pass through a NAT-enabled router, which translates between private and public addresses.
 
@@ -354,21 +339,17 @@ From the above table, only 132.178.227.11 does not belong to RFC 1918 address bl
 
 #### Question 14 - The NAT table
 
-_Pick a vantage behind a NAT and one connection. Draw the section 4.3 table: WAN side (public address and port) and LAN side (local address and port). The NAT's public port is not visible from the client, so say why._
-
 I picked laptop vantage point and the first Utah connection and below is the
 | WAN side | LAN side |
 | :------- | :------- |
 | 172.56.148.24:`UNKNOWN-PORT` | 192.168.12.235:49417 |
 
-From section 4.3 and using figure 4.25, the reason that we cannot see the WAN's side NAT's public port is because all incoming packets simply see destination 172.56.148.24 where the detailed mappings and choices of public ports are: maintained only inside the NAT translation table (not exposed to external hosts or routers).
+From section 4.3 and using figure 4.25, the reason that we cannot see the WAN's side NAT's public port is because all incoming packets simply see destination 172.56.148.24 where the detailed mappings and choices of public ports are: maintained only inside the NAT translation table (not exposed to clients or routers). The NAT rewrites the packet after it leaves the laptop.
 The internal private address structure is completely invisible and stripped from the packet headers.
 
 #### Question 15 - Subnetting
 
-_Use the `ip -4 addr` output (or the laptop's equivalent) in each header. For each vantage point give the interface address and prefix length, network address, broadcast address, usable host range and number of usable hosts (2^(32−p) − 2). Show the binary for one of them._
-
-For laptop since I am on MacOS, I have to use `ifconfig`, and from the following `en0: 	inet 192.168.12.235 netmask 0xffffff00` we get `192.168.12.235/24`. For Onyx and Codespace (both on Linux) it showed you the cdir block directly for `eth0`.
+For laptop since I am on MacOS, I have to use `ifconfig`, and from the following `en0: 	inet 192.168.12.235 netmask 0xffffff00` we get `192.168.12.235/24`. For Onyx and Codespace (both on Linux) it showed you the cdir block directly for `eno12399np01` and `eth0` respectively.
 
 From the book section 4.3, where an address written as a.b.c.d/x, the x most significant bits form the network portion (the prefix), and the remaining 32 − x bits distinguish the individual devices within that network. It also gives an example where an address like a.b.c.d/24 can refer to a specific subnet.
 
