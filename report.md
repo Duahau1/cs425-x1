@@ -159,18 +159,51 @@ _Second mirror: Japan (`ftp.jaist.ac.jp`), from the `latency japan` sections._
 | **Std dev**    | 11.042  | 0.105   | 0.673     |
 | **Mean / min** | 1.04    | 1.00    | 1.00      |
 
-_Explain: why the minimum, not the mean, estimates propagation. Processing, queuing and transmission delay can only add to the propagation delay, never subtract (section 1.4), so the smallest sample has the least added delay and is closest to the true floor. The laptop's mean is 1.69 times its minimum because of queuing, from Wi-Fi and the T-Mobile link, while Onyx and Codespace, on wired data-center links, vary by under 0.4 ms. If I had used the laptop mean, the ratio in Question 1 would have been inflated by queuing that has nothing to do with distance._
+Propagation delay depends on distance and the speed of light in fiber, so for a fixed server it should be nearly the same in every trial. The delay that changes from trial to trial is mainly one of the 4 nodal delay type, which only ever adds to the other components of nodal delay (section 1.4). The mean mixes this queuing into the estimate, while the minimum is the trial with the least of it. The minimum is still not pure propagation: it also contains the fixed processing and transmission delays and the extra distance of a real cable route, so it is the best estimate of the propagation floor, and an upper bound on it.
+
+My own trials support this. For New York, the laptop spread is 174.852 ms with a mean/min ratio of 1.69, while Onyx and Codespace spread only 0.187 ms and 0.372 ms. For Japan, the laptop spread is 26.103 ms with a ratio of 1.04, while Onyx and Codespace spread 0.280 ms and 1.680 ms, both small. The queuing varies by path and by trial: the same laptop was far noisier to New York than to Japan, so a single mean would be unreliable. The distance from one vantage point to a mirror is the same in all five trials, so the trial-to-trial variation is not caused by distance. Because propagation is fixed for a given distance, the minimum is the best estimate of the floor, and the mean would inflate the Question 1 ratios.
 
 #### Question 4 - Transmission delay
 
-_L = 64 × 8 = 512 bits. t = L / R. Do R = 10 Mbit/s and 1 Gbit/s. Compare with your Utah propagation RTT._
+In section 1.4 of the textbook, the transmission-delay formula is $d_{trans} = L / R$, where $L$ is the packet size in bits and $R$ is the link rate in bits per second.
+
+For a 64-byte packet, $L = 64 \times 8 = 512$ bits. At $R = 10$ Mbit/s,
+
+$$
+d_{trans} = \frac{512}{10 \times 10^6} = 5.12 \times 10^{-5} \text{ s} = 0.0512 \text{ ms}.
+$$
+
+At $R = 1$ Gbit/s,
+
+$$
+d_{trans} = \frac{512}{10^9} = 5.12 \times 10^{-7} \text{ s} = 0.000512 \text{ ms}.
+$$
+
+These values are tiny compared with the Utah propagation RTT of about 4.76 ms, so for this small packet the transmission delay is negligible relative to propagation delay.
 
 #### Question 5 - Throughput
 
 _Use the 3 trials of each Packages.gz download. Table: vantage, mirror, Mbit/s per trial. Is the access link the bottleneck in both cases? Evidence: does Utah throughput differ from Japan on the same link?_
 
-| Vantage | Mirror | Trial 1 (Mbit/s) | Trial 2 | Trial 3 |
-| :------ | :----- | :--------------- | :------ | :------ |
+_Throughput in Mbit/s from the `download` sections (13,332,733 bytes each). RTT is the minimum connect time from the same section._
+
+| Vantage   | Mirror | RTT (ms) | Trial 1 (Mbit/s) | Trial 2 (Mbit/s) | Trial 3 (Mbit/s) | Max (Mbit/s) | Mean (Mbit/s) |
+| :-------- | :----- | :------- | :--------------- | :--------------- | :--------------- | :----------- | :------------ |
+| Laptop    | Utah   | 58.482   | 94.965           | 94.830           | 129.469          | 129.469      | 106.42        |
+| Onyx      | Utah   | 49.773   | 85.324           | 78.522           | 87.112           | 87.112       | 83.65         |
+| Codespace | Utah   | 31.384   | 319.607          | 318.705          | 311.124          | 319.607      | 316.48        |
+
+_Utah ÷ Japan, by vantage point:_
+
+| Vantage   | Mean Utah ÷ mean Japan | Max Utah ÷ max Japan |
+| :-------- | :--------------------- | :------------------- |
+| Laptop    | 16.7                   | 17.9                 |
+| Onyx      | 43.4                   | 33.2                 |
+| Codespace | 16.4                   | 13.8                 |
+
+Section 1.4 in the book defines a connection's bottleneck link as the link along its path with the smallest transmission rate, which limits the end-to-end throughput.
+
+The access link cannot be the bottleneck in both cases. Each vantage point uses one access link for both downloads, so if that link limited both, Utah and Japan would give about the same throughput. The same pattern appears at all three vantage points, even though the links differ in speed by about 4× between Onyx and Codespace. Utah is 16.7 times faster than Japan on the laptop, 43.4 times on Onyx and 16.4 times on Codespace (by mean).That is strong evidence the limit is not the access link, because Japan stays far below what the same link delivered from Utah.
 
 ### Chapter 2 - The Application Layer
 
@@ -178,22 +211,45 @@ _Use the 3 trials of each Packages.gz download. Table: vantage, mirror, Mbit/s p
 
 _One mirror per vantage point. DNS time of trial 1 versus trials 2 to 5. Local DNS server and cache, TTL (section 2.4)._
 
-| Vantage | Mirror | Trial 1 (ms) | Trial 2 | Trial 3 | Trial 4 | Trial 5 |
-| :------ | :----- | :----------- | :------ | :------ | :------ | :------ |
+_DNS times in ms from the `latency` sections (5 trials each). Mirror: Utah (`mirrors.xmission.com`). Mean 2-5 is the mean of trials 2 to 5._
+
+| Vantage   | Mirror | Trial 1 | Trial 2 | Trial 3 | Trial 4 | Trial 5 | Mean 2-5 |
+| :-------- | :----- | :------ | :------ | :------ | :------ | :------ | :------- |
+| Laptop    | Utah   | 125.745 | 1.408   | 1.454   | 1.879   | 3.278   | 2.005    |
+| Onyx      | Utah   | 29.182  | 28.597  | 31.931  | 28.563  | 28.369  | 29.365   |
+| Codespace | Utah   | 35.278  | 0.485   | 0.497   | 0.516   | 0.491   | 0.497    |
+
+When a program looks up a name, it asks a local DNS server, which answers from its cache or else resolves the name through the root, TLD and authoritative servers (section 2.4). The first lookup is slow because the cache is empty. The answer is then stored for its TTL, and later lookups are served from the cache without leaving the local network. The ttl is long enough so that we can safely assume that trial 2-5's result are from the local cache.
+
+The laptop and Codespace follow this pattern. Trial 1 is slow (125.745 ms and 35.278 ms), and trials 2 to 5 are fast (about 2 ms and 0.5 ms), so a nearby cache answered them. Onyx does not: all five trials are about 28 to 32 ms.
+Local caches make repeat lookups almost free, while a remote shared server charges one round trip every time.I went into the `measurements-onyx.txt` and looked at dns lookup time of other locations and I realized that trial 2-5 lookup time sometimes even higher than the first look up time. This is the indication that the dns record did not get cached on locally properly on Onyx.
 
 #### Question 7 - The DNS hierarchy
 
-_Use the `dig +trace` from a vantage where it worked (not Onyx). List the servers in order and what each answered (referral or address). Map to root, TLD (`.jp`), authoritative (section 2.4)._
+The laptop's trace (`dig +trace ftp.jaist.ac.jp` in `measurements-laptop.txt`). We can use either Codespace or laptop vantage point as the one on Onyx get blocked for access. Based on the textbook (J. F. Kurose and K. W. Ross, Computer Networking: A Top-Down Approach, Pearson, 2026, sec. 2.4), the 4 hierarchy in order : Local DNS server, Root DNS server, TLD DNS server, authoritative DNS server.
 
-| Step | Server asked | Answer (referral or address) | Level in hierarchy |
-| :--- | :----------- | :--------------------------- | :----------------- |
+| Step | Server asked                              | Answer (referral or address)                                                       | Level in hierarchy                                    |
+| :--- | :---------------------------------------- | :--------------------------------------------------------------------------------- | :---------------------------------------------------- |
+| 1    | Local resolver, 10.50.23.249              | Referral: the 13 root servers (`a` to `m.root-servers.net`)                        | Local DNS server, which returned the root server list |
+| 2    | `i.root-servers.net`, 192.36.148.17       | Referral: the 8 `.jp` name servers (`a`, `b`, `c`, `d`, `e`, `f`, `g`, `h.dns.jp`) | Root                                                  |
+| 3    | `g.dns.jp`, 203.119.40.1                  | Referral: `jaist.ac.jp` name servers `dns-x.sinet.ad.jp` and `ns0.jaist.ac.jp`     | TLD                                                   |
+| 4    | `ns0.jaist.ac.jp`, 2001:df0:2ed:8250::130 | Address: `ftp.jaist.ac.jp` A 150.65.7.130                                          | Authoritative                                         |
 
 #### Question 8 - The CDN
 
 _Did `example.com` get the same address at all three vantage points? Compare its connect time with the mirrors. Section 2.6: DNS redirection versus anycast. Mention the CF-RAY colo code if you have it._
 
-| Vantage | Address | Min connect (ms) |
-| :------ | :------ | :--------------- |
+_Addresses `example.com` resolved to in the five `latency cdn` trials (`-4`) at each vantage point._
+
+| Vantage   | Address (number of trials)            | Min connect (ms) |
+| :-------- | :------------------------------------ | :--------------- |
+| Laptop    | 172.66.147.243 (5)                    | 34.814           |
+| Onyx      | 172.66.147.243 (4), 104.20.23.154 (1) | 11.381           |
+| Codespace | 172.66.147.243 (2), 104.20.23.154 (3) | 5.150            |
+
+In question 1, I have a table that had all the connect time, and the connect time of `example.com` is the lowest compare to all the mirrors.
+
+CDNs place servers close to users using DNS-based redirection with geolocation-driven cluster selection (as covered in Section 2.5). When you request content, the authoritative DNS server responds with a CDN-specific domain name instead of a direct IP. Then the CDN's DNS system evaluates your Local DNS IP address using geolocation databases or delay probes to pinpoint your location and return the IP of the closest optimal edge server cluster.
 
 #### Question 9 - Counting round trips
 
