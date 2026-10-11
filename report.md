@@ -247,13 +247,46 @@ _Addresses `example.com` resolved to in the five `latency cdn` trials (`-4`) at 
 | Onyx      | 172.66.147.243 (4), 104.20.23.154 (1) | 11.381           |
 | Codespace | 172.66.147.243 (2), 104.20.23.154 (3) | 5.150            |
 
+All three vantage points received the same IP address 172.66.147.243, but there are address changed between trials at Onyx and Codespace.
 In question 1, I have a table that had all the connect time, and the connect time of `example.com` is the lowest compare to all the mirrors.
 
-CDNs place servers close to users using DNS-based redirection with geolocation-driven cluster selection (as covered in Section 2.5). When you request content, the authoritative DNS server responds with a CDN-specific domain name instead of a direct IP. Then the CDN's DNS system evaluates your Local DNS IP address using geolocation databases or delay probes to pinpoint your location and return the IP of the closest optimal edge server cluster.
+Based on chapter 2.5 of the textbook, I think the strategy that it is using is cluster selection strategy where cdn maps your local dns server's ip to a geographic location using geolocation databases and then pick the nearest/best-performing one to you. The fact that the connect time is very low with Onyx and Codespace it is only 5ms-12ms means that the CDN has a cluster near each vantage point. The addresses differed between trials at Onyx and Codespace meaning the CDN does not always send us to the same server, it is select the most optimal one to send us to (this is base on delay, bandwidth, not just closest edge).
 
 #### Question 9 - Counting round trips
 
 _First byte ≈ 1 RTT + server time, so server time ≈ first byte − min connect. Do two mirrors. Then count RTTs from DNS start to last byte (DNS, TCP handshake, HTTP request) and compare with the non-persistent HTTP estimate in section 2.2 and A2 step 4._
+
+| Mirror | Vantage | Trial | Connect / RTT (ms) | First byte (ms) | Estimated server time (ms) |
+| :----- | :------ | :---- | :----------------- | :-------------- | :------------------------- |
+| Utah   | Onyx    | 1     | 49.863             | 50.405          | 0.542                      |
+| Utah   | Onyx    | 2     | 49.820             | 50.356          | 0.536                      |
+| Utah   | Onyx    | 3     | 49.612             | 50.100          | 0.488                      |
+| Utah   | Onyx    | 4     | 49.944             | 50.536          | 0.592                      |
+| Utah   | Onyx    | 5     | 50.053             | 50.474          | 0.421                      |
+| Japan  | Onyx    | 1     | 132.146            | 199.182         | 67.036                     |
+| Japan  | Onyx    | 2     | 132.067            | 133.281         | 1.214                      |
+| Japan  | Onyx    | 3     | 131.973            | 133.297         | 1.324                      |
+| Japan  | Onyx    | 4     | 132.160            | 141.132         | 8.972                      |
+| Japan  | Onyx    | 5     | 132.253            | 133.451         | 1.198                      |
+
+In the below table we will calculate DNS start to last byte (ms)
+= DNS (ms) + Connect / RTT (ms) + First byte (ms) + Transfer (ms)
+According to chapter 2.2 in the textbook, for a non-persistent HTTP connection, the estimation for retrieving a single base HTML file is: Total Response Time = $2 \times RTT$ + File Transmission Time. We can further break it down to Total RTTs = 1 RTT (TCP Handshake) + 1 RTT (HTTP Request/Response) = 2 RTTs total + File Transmission Time. The DNS look up time happens before the RTT as it needs to make the IP address known.
+
+| Mirror | Trial | DNS time (ms) | Min connect time / RTT (ms) | Transfer after first byte (ms) | DNS start to last byte (ms) | 2 x RTT + transmission time (ms) | Ratio: (Connect + First byte + Transfer) / (2 x RTT + transmission time) |
+| :----- | :---- | :------------ | :-------------------------- | :----------------------------- | :-------------------------- | :------------------------------- | :----------------------------------------------------------------------- |
+| Utah   | 1     | 29.182        | 49.612                      | 0.018                          | 129.468                     | 99.242                           | 1.011                                                                    |
+| Utah   | 2     | 28.597        | 49.612                      | 0.011                          | 128.784                     | 99.235                           | 1.010                                                                    |
+| Utah   | 3     | 31.931        | 49.612                      | 0.010                          | 131.653                     | 99.234                           | 1.005                                                                    |
+| Utah   | 4     | 28.563        | 49.612                      | 0.010                          | 129.053                     | 99.234                           | 1.013                                                                    |
+| Utah   | 5     | 28.369        | 49.612                      | 0.037                          | 128.933                     | 99.261                           | 1.013                                                                    |
+| Japan  | 1     | 344.676       | 131.973                     | 0.018                          | 676.022                     | 263.964                          | 1.255                                                                    |
+| Japan  | 2     | 31.828        | 131.973                     | 0.010                          | 297.186                     | 263.956                          | 1.005                                                                    |
+| Japan  | 3     | 203.394       | 131.973                     | 0.010                          | 468.674                     | 263.956                          | 1.005                                                                    |
+| Japan  | 4     | 207.562       | 131.973                     | 0.010                          | 480.864                     | 263.956                          | 1.035                                                                    |
+| Japan  | 5     | 201.697       | 131.973                     | 0.043                          | 467.444                     | 263.989                          | 1.007                                                                    |
+
+From the above table, we can see based on the last ratio column, the ratio is around 1 -1.2 which means it matched well with the formula form section 2.2. If we are taking the minimum of connect time, first byte, and dns lookup time, and to compute the DNS start to last byte (ms)/ min RTT (s) we get 2.6 and 2.25 for Utah and Japan respectively. These data are close to 2 RTTs which matched well with what section 2.2 was showing.
 
 ### Chapter 3 - The Transport Layer
 
@@ -261,21 +294,47 @@ _First byte ≈ 1 RTT + server time, so server time ≈ first byte − min conne
 
 _When `connect` returns: SYN sent, SYN-ACK received. The third segment (ACK) is sent but not waited for. Why does the client not need to wait? Section 3.5._
 
+When the client-side `connect()` call returns, the following `TCP` segments have been sent and received:
+
+- Sent by Client: The initial `SYN` segment.
+
+- Received & Sent by Server: The server received the `SYN` and replied with the `SYN-ACK` segment.
+
+- Sent by Client: The client received the `SYN-ACK` and transmitted the final `ACK` segment back.
+
+As outline in section 3.5.6, the client does not need to wait for the `ACK` reply from the server because the client transitions from `SYN_SENT` to `ESTABLISHED` as soon as it receives the server's `SYN-ACK` and fires off its own final `ACK`. As soon as the client dispatches that last acknowledgment packet, the local connection state is marked open, allowing `connect()` to return, both sides are ready to send data.
+
 #### Question 11 - Demultiplexing
 
 _Take the "two at once" section of one measurement file. Write down both 4-tuples. What differs, who picked it (the OS picks the ephemeral source port), and how the server tells them apart (4-tuple demultiplexing, section 3.2)._
 
-| Run | Local address:port | Remote address:port |
-| :-- | :----------------- | :------------------ |
-| 1   |                    |                     |
-| 2   |                    |                     |
+Using the "two at once" section of `measurements-onyx.txt`, against Utah's mirror, trial 1 for each run.
+
+| Run | Local address:port   | Remote address:port |
+| :-- | :------------------- | :------------------ |
+| 1   | 132.178.227.11:56554 | 198.60.22.13:80     |
+| 2   | 132.178.227.11:56568 | 198.60.22.13:80     |
+
+The only source port's difference is port 56554 versus 56568 in the local address. This is because the OS picked an ephemeral port when `connect` was called as the program did not assign a fixed port in the code.
+
+In section 3.2, when multiple TCP connections arrive at the web server’s port 80, they are not distinguished by the destination port. The transport layer used the 4 tuple to demultiplex: each segment goes to the socket that match all 4 values, so the 2 connections are uniquely identified even though they ran in parallel.
 
 #### Question 12 - Slow start
 
 _MSS = 1,460 B, initial cwnd = 10 segments, doubling each RTT, no loss. File = 13,332,733 B, so segments = ceil(size / 1460). Find the number of RTTs n where 10 × (2^n − 1) ≥ segments. Shortest time = n × RTT using your min connect time (add the handshake RTT if you want to be strict, and say so). Compare with the measured transfer time. Sections 3.5 and 3.7._
 
+Using the onyx vantage point, with the package size 13MB
+Segments = ceil(13332733/ 1406)= 9132.0089 so it is 9133 segments
+Then using 10 × (2^n − 1) ≥ segments we get n = 10 as n=9 is less than what we need.
+The shortest time is n x RTT and measured is the mean transfer time of the 3 downloads
+
 | Mirror | Segments | RTTs needed | RTT (ms) | Shortest time (ms) | Measured (ms) |
 | :----- | :------- | :---------- | :------- | :----------------- | :------------ |
+| Utah   | 9133     | 10          | 49.612   | 496.1              | 1277.6        |
+| Japan  | 9133     | 10          | 131.976  | 1319.7             | 64028.1       |
+
+The Utah path comes much closer to its theoretical estimate, scaling far better than the trans-continental Japan link.
+I think slow start did set the minimum as we can see that the measured time for Utah is about 2.6 this minium and the rest is coming propagation delay, nodal delay, or congestion. The measured Japan is about 48 times the shortest time, however, we are measuring this reality where all sort of things could have happened so just the slow start time cannot explain this in this case. Higher propagation delay over long distances increases the penalty of any packet drops or retransmissions, forcing the connection out of slow-start and into congestion avoidance or timeout recovery.
 
 ### Chapter 4 - The Network Layer
 
@@ -283,32 +342,71 @@ _MSS = 1,460 B, initial cwnd = 10 segments, doubling each RTT, no loss. File = 1
 
 _Local address comes from the 4-tuple, public from `checkip`. RFC 1918 ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16. Behind a NAT if the local and public addresses differ._
 
-| Vantage   | Local address | Public address (checkip) | Private (RFC 1918)? | Behind NAT? |
-| :-------- | :------------ | :----------------------- | :------------------ | :---------- |
-| Laptop    |               |                          |                     |             |
-| Onyx      |               |                          |                     |             |
-| Codespace |               |                          |                     |             |
+The local address is the source address in the 4 tuple from `measurements-<vantage>.txt`. The public address is coming from `checkip`. And according to section 4.3, where it said that for private RFC 1918 address blocks(RFC 1918 ranges: 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16),they must pass through a NAT-enabled router, which translates between private and public addresses.
+
+| Vantage   | Local address  | Public address (checkip) | Private (RFC 1918)? | Behind NAT? |
+| :-------- | :------------- | :----------------------- | :------------------ | :---------- |
+| Laptop    | 192.168.12.235 | 172.56.148.24            | Yes                 | Yes         |
+| Onyx      | 132.178.227.11 | 132.178.227.11           | No                  | No          |
+| Codespace | 10.0.0.97      | 51.143.4.81              | Yes                 | Yes         |
+
+From the above table, only 132.178.227.11 does not belong to RFC 1918 address blocks so it is not behind a NAT
 
 #### Question 14 - The NAT table
 
 _Pick a vantage behind a NAT and one connection. Draw the section 4.3 table: WAN side (public address and port) and LAN side (local address and port). The NAT's public port is not visible from the client, so say why._
 
+I picked laptop vantage point and the first Utah connection and below is the
 | WAN side | LAN side |
 | :------- | :------- |
-|          |          |
+| 172.56.148.24:`UNKNOWN-PORT` | 192.168.12.235:49417 |
+
+From section 4.3 and using figure 4.25, the reason that we cannot see the WAN's side NAT's public port is because all incoming packets simply see destination 172.56.148.24 where the detailed mappings and choices of public ports are: maintained only inside the NAT translation table (not exposed to external hosts or routers).
+The internal private address structure is completely invisible and stripped from the packet headers.
 
 #### Question 15 - Subnetting
 
 _Use the `ip -4 addr` output (or the laptop's equivalent) in each header. For each vantage point give the interface address and prefix length, network address, broadcast address, usable host range and number of usable hosts (2^(32−p) − 2). Show the binary for one of them._
 
-| Vantage | Address/prefix | Network | Broadcast | Usable range | Usable hosts |
-| :------ | :------------- | :------ | :-------- | :----------- | :----------- |
+For laptop since I am on MacOS, I have to use `ifconfig`, and from the following `en0: 	inet 192.168.12.235 netmask 0xffffff00` we get `192.168.12.235/24`. For Onyx and Codespace (both on Linux) it showed you the cdir block directly for `eth0`.
+
+From the book section 4.3, where an address written as a.b.c.d/x, the x most significant bits form the network portion (the prefix), and the remaining 32 − x bits distinguish the individual devices within that network. It also gives an example where an address like a.b.c.d/24 can refer to a specific subnet.
+
+The usable range and usable hosts are calculate using the following formula: (2^(32−prefix) − 2) where the .0 is the network-address and the last ip of the range is used for broadcast so they are not part of the usable range.
+
+| Vantage   | Address/prefix    | Network       | Broadcast       | Usable range                  | Usable hosts |
+| :-------- | :---------------- | :------------ | :-------------- | :---------------------------- | :----------- |
+| Laptop    | 192.168.12.235/24 | 192.168.12.0  | 192.168.12.255  | 192.168.12.1–192.168.12.254   | 254          |
+| Onyx      | 132.178.227.11/25 | 132.178.227.0 | 132.178.227.127 | 132.178.227.1–132.178.227.126 | 126          |
+| Codespace | 10.0.0.97/16      | 10.0.0.0      | 10.0.255.255    | 10.0.0.1–10.0.255.254         | 65,534       |
+
+The binary of Onyx 132.178.227.11/25. The first three octets are fully in the network part so I will show the last octet.
+
+| Value                                  | Last octet in binary | Last octet in decimal |
+| :------------------------------------- | :------------------- | :-------------------- |
+| Address                                | `00001011`           | 11                    |
+| Subnet mask                            | `10000000`           | 128                   |
+| Network address (address AND mask)     | `00000000`           | 0                     |
+| Broadcast address (host bits set to 1) | `01111111`           | 127                   |
+| First usable host                      | `00000001`           | 1                     |
+| Last usable host                       | `01111110`           | 126                   |
 
 ---
 
 ## Task 6 - Catch the Agent
 
+For more context, after I input all the data, this is what I asked
+
+```
+The dns lookup time from laptop and codespace aligned with my above prediction as the dns resolver cached the dns record so subsequent lookup time dropped. The onyx's look up time stayed almost constant. I went into the `measurements-onyx.txt` and looked at dns lookup time of other locations and I realized that trial 2-5 lookup time sometimes even higher than the first look up time. This is the indication that the dns record did not get cached on locally or any where along the paths that it hopped (if it hopped on the same path).  does it make sense ?
+```
+
 - **Quote from Agent Session:**
-  > "[Paste exact statement here]"
-- **Verification Method:** [Man page / Textbook section / Specific measurement]
-- **Explanation & Correct Answer:** [Explain why the agent was incorrect/incomplete and state the correct behavior/concept]
+  > "Partly. The laptop and Codespace part is right, but your Onyx conclusion is probably wrong. **Laptop and Codespace:** this is correct. DNS drops from tens or hundreds of ms to about 0.5 to 2 ms because the local resolver cached the record (section 2.4). Say what your prediction was, so the link is explicit.**Onyx: "the record did not get cached" doesn't follow from your data** - Utah's DNS time on Onyx is about 29 ms on all five trials, including trial 1. If nothing were cached, trial 1 would be slow, as it is on the laptop and Codespace. - Your `dig +trace` shows the campus resolver (10.50.18.111) answering a query for the root NS list in 28 ms. That list is certainly cached, so about 28 ms is the cost of reaching the resolver from Onyx. So 28 to 32 ms is most likely a **cache hit** with a high fixed cost, not a miss. - Another explanation for the spikes: the first Utah lookup was already a hit because earlier runs had cached it. Records for far-away names (California, Germany, Japan) show spikes of 100 to 1,000 ms. Those could be misses, or a different resolver instance with its own cache, if the campus uses a pool. **What to write:** the cache works on Onyx but the resolver is far, so every hit costs about 29 ms. Occasional spikes suggest misses or a pool of resolvers. Say you can't confirm which.
+
+**A quick test:** on Onyx, run `dig mirrors.xmission.com` twice and compare the "Query time" and the TTL. A TTL that counts down between runs means the answer came from a cache. That would be good evidence to quote.
+
+The phrase "if it hopped on the same path" is unclear, so drop it or rephrase it as "if the queries reached the same resolver"."
+
+- **Verification Method:** Compared the Onyx DNS timings in `measurements-onyx.txt` with the HTTP `Connect` timings, then used textbook section 2.4 to distinguish recursive DNS resolution from an HTTP connection to a mirror.
+- **Explanation & Correct Answer:** The agent's conclusion that the Onyx cache "works" is too certain. The data shows a roughly 28-32 ms floor for many answers, but it does not prove that a response came from a cache or identify where that cache was located. The HTTP connect time to Japan or Germany also cannot establish a minimum DNS lookup time because authoritative DNS servers can be hosted separately from the HTTP mirror. The Onyx timing variation is consistent with cache hits, cache misses, or different recursive-resolver instances. To verify caching, query the same resolver twice and confirm that the returned TTL decreases on the second response.
