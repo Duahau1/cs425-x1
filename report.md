@@ -216,10 +216,9 @@ The mirror is used is the one from Utah
 | Onyx      | Utah   | 29.182  | 28.597  | 31.931  | 28.563  | 28.369  | 29.365   |
 | Codespace | Utah   | 35.278  | 0.485   | 0.497   | 0.516   | 0.491   | 0.497    |
 
-When a program looks up a name, it asks a local DNS server, which answers from its cache or else resolves the name through the root, TLD and authoritative servers (section 2.4). The first lookup is slow because the cache is empty. The answer is then stored for its TTL, and later lookups are served from the cache without leaving the local network. The ttl is long enough so that we can safely assume that trial 2-5's result are from the local cache.
+When a program looks up a name, it asks a local DNS server, which answers from its cache or else resolves the name through the root, TLD and authoritative servers (section 2.4). A cached answer can be returned without repeating the full hierarchy lookup, subject to its TTL.
 
-The laptop and Codespace follow this pattern. Trial 1 is slow (125.745 ms and 35.278 ms), and trials 2 to 5 are fast (about 2 ms and 0.5 ms), so a nearby cache answered them. Onyx does not: all five trials are about 28 to 32 ms.
-Local caches make repeat lookups almost free, while a remote shared server charges one round trip every time.I went into the `measurements-onyx.txt` and looked at dns lookup time of other locations and I realized that trial 2-5 lookup time sometimes even higher than the first look up time. Looking at the above table, there are 2 possible explanations for this, one is the dns record did not get cached on locally properly on Onyx or the dns record has already get cached so what I got was hit record retrieved from the cache.
+The laptop and Codespace follow this pattern. Trial 1 is slow (125.745 ms and 35.278 ms), while trials 2 through 5 are about 2 ms and 0.5 ms, respectively, which is consistent with a nearby resolver cache. Onyx does not show the same timing pattern: all five trials are about 28 to 32 ms. Its resolver may be remote, may not retain the entry, or may serve a cache that still has a fixed network round trip. Timing alone cannot prove which explanation is true, but the measurements do show that the laptop and Codespace cache path is much faster than Onyx's.
 
 #### Question 7 - The DNS hierarchy
 
@@ -240,14 +239,13 @@ The laptop's trace (`dig +trace ftp.jaist.ac.jp` in `measurements-laptop.txt`). 
 | Onyx      | 172.66.147.243 (4), 104.20.23.154 (1) | 11.381           |
 | Codespace | 172.66.147.243 (2), 104.20.23.154 (3) | 5.150            |
 
-All three vantage points received the same IP address 172.66.147.243, but there are address changed between trials at Onyx and Codespace.
-In question 1, I have a table that had all the connect time, and the connect time of `example.com` is the lowest compare to all the mirrors.
+DNS did not give an identical result on every trial: the laptop received only `172.66.147.243`, while Onyx and Codespace received both `172.66.147.243` and `104.20.23.154`. All three did receive the first address at least once. `example.com` also had the lowest minimum connect time at every vantage point: 34.814 ms on the laptop, 11.381 ms on Onyx, and 5.150 ms in Codespace.
 
-Based on chapter 2.5 of the textbook, I think the strategy that it is using is cluster selection strategy where cdn maps your local dns server's ip to a geographic location using geo-location databases and then pick the nearest/best-performing one to you. The fact that the connect time is very low with Onyx and Codespace it is only 5ms-12ms means that the CDN has a cluster near each vantage point. The addresses differed between trials at Onyx and Codespace meaning the CDN does not always send us to the same server, it is select the most optimal one to send us to (this is base on delay, bandwidth, not just closest edge).
+Section 2.6 describes CDN cluster selection, in which the authoritative DNS service selects a replica or replica pool based on information such as the requesting resolver's location and current conditions. The low connect times, especially 5 to 12 ms on Codespace and Onyx, support the conclusion that the CDN selected a nearby edge cluster. The two returned addresses show that DNS can return more than one address from its pool. The measurements alone do not reveal the physical server behind either address or prove the exact selection input, but they are consistent with DNS-based cluster selection rather than a single fixed origin server.
 
 #### Question 9 - Counting round trips
 
-First byte ≈ 1 RTT + server time, so server time ≈ first byte − min connect
+First byte is measured from sending the HTTP request until the first response byte. For a non-persistent connection, it is approximately one RTT plus server processing, so server time is estimated as `first byte − connect` for the same trial.
 
 | Mirror | Vantage | Trial | Connect / RTT (ms) | First byte (ms) | Estimated server time (ms) |
 | :----- | :------ | :---- | :----------------- | :-------------- | :------------------------- |
@@ -262,24 +260,18 @@ First byte ≈ 1 RTT + server time, so server time ≈ first byte − min connec
 | Japan  | Onyx    | 4     | 132.160            | 141.132         | 8.972                      |
 | Japan  | Onyx    | 5     | 132.253            | 133.451         | 1.198                      |
 
-In the below table we will calculate DNS start to last byte (ms)
-= DNS (ms) + Connect / RTT (ms) + First byte (ms) + Transfer (ms)
-According to chapter 2.2 in the textbook, for a non-persistent HTTP connection, the estimation for retrieving a single base HTML file is: Total Response Time = $2 \times RTT$ + File Transmission Time. We can further break it down to Total RTTs = 1 RTT (TCP Handshake) + 1 RTT (HTTP Request/Response) = 2 RTTs total + File Transmission Time. The DNS look up time happens before the RTT as it needs to make the IP address known.
+From the start of the DNS lookup through the last byte, pageload spends:
 
-| Mirror | Trial | DNS time (ms) | Min connect time / RTT (ms) | Transfer after first byte (ms) | DNS start to last byte (ms) | 2 x RTT + transmission time (ms) | Ratio: (Connect + First byte + Transfer) / (2 x RTT + transmission time) |
-| :----- | :---- | :------------ | :-------------------------- | :----------------------------- | :-------------------------- | :------------------------------- | :----------------------------------------------------------------------- |
-| Utah   | 1     | 29.182        | 49.612                      | 0.018                          | 129.468                     | 99.242                           | 1.011                                                                    |
-| Utah   | 2     | 28.597        | 49.612                      | 0.011                          | 128.784                     | 99.235                           | 1.010                                                                    |
-| Utah   | 3     | 31.931        | 49.612                      | 0.010                          | 131.653                     | 99.234                           | 1.005                                                                    |
-| Utah   | 4     | 28.563        | 49.612                      | 0.010                          | 129.053                     | 99.234                           | 1.013                                                                    |
-| Utah   | 5     | 28.369        | 49.612                      | 0.037                          | 128.933                     | 99.261                           | 1.013                                                                    |
-| Japan  | 1     | 344.676       | 131.973                     | 0.018                          | 676.022                     | 263.964                          | 1.255                                                                    |
-| Japan  | 2     | 31.828        | 131.973                     | 0.010                          | 297.186                     | 263.956                          | 1.005                                                                    |
-| Japan  | 3     | 203.394       | 131.973                     | 0.010                          | 468.674                     | 263.956                          | 1.005                                                                    |
-| Japan  | 4     | 207.562       | 131.973                     | 0.010                          | 480.864                     | 263.956                          | 1.035                                                                    |
-| Japan  | 5     | 201.697       | 131.973                     | 0.043                          | 467.444                     | 263.989                          | 1.007                                                                    |
+`DNS + 1 RTT for the TCP handshake (connect) + 1 RTT for the HTTP request/first response byte + file transmission.`
 
-From the above table, we can see based on the last ratio column, the ratio is around 1 -1.2 which means it matched well with the formula form section 2.2. If we are taking the minimum of connect time, first byte, and dns lookup time, and to compute the DNS start to last byte (ms)/ min RTT (s) we get 2.6 and 2.25 for Utah and Japan respectively. These data are close to 2 RTTs which matched well with what section 2.2 was showing.
+The DNS lookup precedes the two HTTP/TCP round trips and is not part of the section 2.2 `2 × RTT + transmission` estimate. I use a low-latency trial from each mirror below, and keep all terms from the same trial rather than combining minima from different trials.
+
+| Mirror | Trial | DNS (ms) | Connect (ms) | First byte (ms) | Transfer (ms) | DNS start to last byte (ms) | Time after DNS (ms) | `(connect + first byte + transfer) / (2 × min connect + transfer)` |
+| :----- | :---- | :------- | :----------- | :-------------- | :------------ | :-------------------------- | :------------------ | :------------------------------------------------------------------ |
+| Utah   | 3     | 31.931   | 49.612       | 50.100          | 0.010         | 131.653                     | 99.722              | 1.005                                                               |
+| Japan  | 2     | 31.828   | 132.067      | 133.281         | 0.010         | 297.186                     | 265.358             | 1.005                                                               |
+
+For Utah, the time after DNS is 99.722 ms, or 2.01 of the 49.612 ms minimum-connect RTTs. For Japan, it is 265.358 ms, or 2.01 of the 131.973 ms minimum-connect RTTs. Both closely match the section 2.2 non-persistent HTTP model: one RTT for the TCP handshake and one RTT for the request and first response byte, followed by the negligible README transfer time. The complete DNS-to-last-byte time is larger because DNS is a separate preceding lookup; its variability, especially on Onyx, is visible in the raw output and should not be counted as an HTTP round trip.
 
 ### Chapter 3 - The Transport Layer
 
