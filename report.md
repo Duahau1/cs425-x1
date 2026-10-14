@@ -309,7 +309,7 @@ The shortest time is n x RTT and measured is the mean transfer time of the 3 dow
 | Mirror | Segments | RTTs needed | RTT (ms) | Shortest time (ms) | Measured (ms) |
 | :----- | :------- | :---------- | :------- | :----------------- | :------------ |
 | Utah   | 9133     | 10          | 49.612   | 496.1              | 1277.6        |
-| Japan  | 9133     | 10          | 131.976  | 1319.7             | 64028.1       |
+| Japan  | 9133     | 10          | 131.973  | 1319.7             | 64028.1       |
 
 The Utah path comes much closer to its theoretical estimate, scaling far better than the trans-continental Japan link.
 I think slow start did set the minimum as we can see that the measured time for Utah is about 2.6 this minium and the rest is link rate, nodal delay, or congestion. The measured Japan is about 48 times the shortest time, however, we are measuring this reality where all sort of things could have happened so just the slow start time cannot explain this in this case. Higher propagation delay over long distances increases the penalty of any packet drops or retransmissions, forcing the connection out of slow-start and into congestion avoidance or timeout recovery.
