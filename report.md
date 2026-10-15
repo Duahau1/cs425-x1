@@ -81,6 +81,8 @@ A larger ratio means additional delay from queuing, transmission, and processing
 | Germany          | 8,454         | 84.54                | 174.865          | 2.07  |
 | Japan            | 8,485         | 84.85                | 187.719          | 2.21  |
 
+My prediction for the min connect was closer to the actual min connect from laptop then the propagation RTT from the calculation. This proved to me that the physical distance that packets have to travel is not a straight line and the documents that I found used a better estimate measurements.
+
 **Onyx** (Boise State campus, Boise, ID: same coordinates as the laptop)
 
 | Mirror           | Distance (km) | Propagation RTT (ms) | Min connect (ms) | Ratio |
@@ -103,6 +105,8 @@ A larger ratio means additional delay from queuing, transmission, and processing
 | Germany                   | 8,259         | 82.59                | 152.897          | 1.85  |
 | Japan                     | 8,018         | 80.18                | 107.391          | 1.34  |
 
+Based on the above mirror, the longest connect time for Codespace is Germany, this aligned with my prediction with slightly different assumed location(I picked San Francisco instead of Seattle but the distance to Germany is still the furthest).
+
 #### Question 2 - Where the extra time goes
 
 According to the textbook section 1.4, there are 4 types of nodal delay where the total nodal delay is equal $$d_{\text{nodal}} = d_{\text{proc}} + d_{\text{queue}} + d_{\text{trans}} + d_{\text{prop}}$$
@@ -111,7 +115,7 @@ Calculation in theory did not account for any of this and also it is hard to kno
 I have also included the factor where path is not a straight line (or crow flies) in my prediction in Task 3. In reality, it would be impossible just have a crow flies access(which is the shortest possible path). In chapter 1.4, the textbook introduce `traceroute` example which was a very niche demonstration that path is not a straight line. I ran `traceroute ftp.fau.de` on my computer and by observing IPs of all the hops the way data packets travel are zigzag where each hop is a router chosen by real-world forwarding decisions, not by a straight-line geographic route.
 
 Based on the above table, we can see the pattern where for Japan, the propagation delay is the dominant factor because the distance is about 8,500 km, giving a propagation RTT of about 85 ms. The measured minimum connect time is about 188 ms, so the remaining delay is mostly queueing and processing along the path. For Utah, if you take the average of the three vantage points difference between min connect time and propagation RTT, it is around 40ms which accounts for 86% of the average min connect time of the 3 vantages point. This matches the nodal-delay model:
-d_nodal = d_proc + d_queue + d_trans + d_prop
+`d_nodal = d_proc + d_queue + d_trans + d_prop`
 with propagation dominating for long-haul Japan and queueing/processing dominating for short-haul Utah.
 
 #### Question 3 - Minimum, not mean
@@ -202,7 +206,9 @@ _Utah ÷ Japan, by vantage point:_
 
 Section 1.4 in the book defines a connection's bottleneck link as the link along its path with the smallest transmission rate, which limits the end-to-end throughput.
 
-The access link cannot be the bottleneck in both cases. Each vantage point uses one access link for both downloads, so if that link limited both, Utah and Japan would give about the same throughput. The same pattern appears at all three vantage points, even though the links differ in speed by about 4× between Onyx and Codespace. Utah is 16.7 times faster than Japan on the laptop, 43.4 times on Onyx and 16.4 times on Codespace (by mean).That is strong evidence the limit is not the access link, because Japan stays far below what the same link delivered from Utah.
+The access link cannot be the bottleneck in both cases. Each vantage point uses one access link for both downloads, so if that link limited both, Utah and Japan would give about the same throughput. The same pattern appears at all three vantage points, even though the links differ in speed by about 4× between Onyx and Codespace. Utah is 16.7 times faster than Japan on the laptop, 43.4 times on Onyx and 16.4 times on Codespace (by mean). That is strong evidence the limit is not the access link, because Japan stays far below what the same link delivered from Utah.
+
+This aligned with my prediction that Japan's download time was slower comparing to that of Utah.
 
 ### Chapter 2 - The Application Layer
 
@@ -219,6 +225,8 @@ The mirror is used is the one from Utah
 When a program looks up a name, it asks a local DNS server, which answers from its cache or else resolves the name through the root, TLD and authoritative servers (section 2.4). The first lookup is slow because the cache is empty. The answer is then stored for its TTL, and later lookups are served from the cache without leaving the local network. The ttl is long enough so that we can safely assume that trial 2-5's result are from the local cache.
 
 The laptop and Codespace follow this pattern. Trial 1 is slow (125.745 ms and 35.278 ms), while trials 2 through 5 are about 2 ms and 0.5 ms, respectively, which is consistent with a nearby resolver cache. Onyx does not show the same timing pattern: all five trials are about 28 to 32 ms. Its resolver may be remote, may not retain the entry, or may serve a cache that still has a fixed network round trip. Timing alone cannot prove which explanation is true, but the measurements do show that the laptop and Codespace cache path is much faster than Onyx's.
+
+The laptop and Codespace aligned with my prediction while the Onyx did not as explained above.
 
 #### Question 7 - The DNS hierarchy
 
@@ -261,9 +269,9 @@ First byte is measured from sending the HTTP request until the first response by
 | Japan  | Onyx    | 4     | 132.160            | 141.132         | 8.972                      |
 | Japan  | Onyx    | 5     | 132.253            | 133.451         | 1.198                      |
 
-In the below table we will calculate DNS start to last byte (ms)
-= DNS (ms) + Connect / RTT (ms) + First byte (ms) + Transfer (ms)
-According to chapter 2.2 in the textbook, for a non-persistent HTTP connection, the estimation for retrieving a single base HTML file is: Total Response Time = $2 \times RTT$ + File Transmission Time. We can further break it down to Total RTTs = 1 RTT (TCP Handshake) + 1 RTT (HTTP Request/Response) = 2 RTTs total + File Transmission Time. The DNS look up time happens before the RTT as it needs to make the IP address known.
+In the below table we will calculate `DNS start to last byte (ms)
+= DNS (ms) + Connect / RTT (ms) + First byte (ms) + Transfer (ms)`
+According to chapter 2.2 in the textbook, for a non-persistent HTTP connection, the estimation for retrieving a single base HTML file is: `Total Response Time = $2 \times RTT$ + File Transmission Time`. We can further break it down to `Total RTTs = 1 RTT (TCP Handshake) + 1 RTT (HTTP Request/Response) = 2 RTTs total + File Transmission Time`. The DNS look up time happens before the RTT as it needs to make the IP address known.
 
 | Mirror | Trial | DNS (ms) | Connect (ms) | First byte (ms) | Transfer (ms) | DNS start to last byte (ms) | Time after DNS (ms) | `(connect + first byte + transfer) / (2 × min connect + transfer)` |
 | :----- | :---- | :------- | :----------- | :-------------- | :------------ | :-------------------------- | :------------------ | :----------------------------------------------------------------- |
@@ -301,10 +309,11 @@ In section 3.2, when multiple TCP connections arrive at the web server’s port 
 
 #### Question 12 - Slow start
 
-Using the onyx vantage point, with the package size 13MB
-Segments = ceil(13332733/ 1460)= 9132.0089 so it is 9133 segments
-Then using 10 × (2^n − 1) ≥ segments we get n = 10 as n=9 is less than what we need.
-The shortest time is n x RTT and measured is the mean transfer time of the 3 downloads
+In section 3.5, the textbook provides the context for how segment size (MSS) and connection setup overhead dictate overall throughput. Using the onyx vantage point, with the package size 13MB
+Segments = ceil(13332733/ 1460)= 9132.0089 so it is 9133 segments.
+Then using 10 × (2^n − 1) ≥ segments (section 3.7) we get n = 10 as n=9 is less than what we need.
+
+In section 3.7, RTT Dependency: Highlights how the round-trip time directly scales the duration of each transmission round ($Time = n \times \text{number of RTTs}$). The shortest time measured is the mean transfer time of the 3 downloads.
 
 | Mirror | Segments | RTTs needed | RTT (ms) | Shortest time (ms) | Measured (ms) |
 | :----- | :------- | :---------- | :------- | :----------------- | :------------ |
@@ -326,7 +335,9 @@ The local address is the source address in the 4 tuple from `measurements-<vanta
 | Onyx      | 132.178.227.11 | 132.178.227.11           | No                  | No          |
 | Codespace | 10.0.0.97      | 51.143.4.81              | Yes                 | Yes         |
 
-From the above table, only 132.178.227.11 does not belong to RFC 1918 address blocks so it is not behind a NAT
+From the above table, only 132.178.227.11 does not belong to RFC 1918 address blocks so it is not behind a NAT.
+
+The prediction that I did was wrong for Onyx, whether or not a vantage point is behind a NAT should be based on the IP block not the network architect.
 
 #### Question 14 - The NAT table
 
